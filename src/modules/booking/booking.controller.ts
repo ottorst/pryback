@@ -49,10 +49,10 @@ export class BookingController {
         await this.eventsService.eventDetailCountingBookingsAndPersons(
           createBookingDto.eventsId,
         );
-      const disponibles = event.maxseats - event.totalPersons;
-      if (createBookingDto.quantity > disponibles) {
+      const available = event.maxseats - event.totalPersons;
+      if (createBookingDto.quantity > available) {
         throw new HttpException(
-          `There are only ${disponibles} seats available.`,
+          `There are only ${available} seats available.`,
           HttpStatus.BAD_REQUEST,
         );
       }
