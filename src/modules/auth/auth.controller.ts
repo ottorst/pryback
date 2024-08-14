@@ -172,6 +172,18 @@ export class AuthController {
           };
   
           user = await this.authService.registerUserWithAuth0(newUser);
+          await fetch(`${process.env.BACKEND_URL}/email/createUserEmail`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              to: email,
+              text: `Welcome to Our culinary experience, ${newUser.name} !`,
+              urlHome: process.env.FRONTEND_URL,
+              name: newUser.name,
+            }),
+          });  
         }
   
         const token = await this.authService.createToken(user);
