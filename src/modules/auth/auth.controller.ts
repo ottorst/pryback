@@ -190,7 +190,7 @@ export class AuthController {
   
         // Redirige al frontend con el token en la URL
 
-        const frontendUrl = process.env.FRONTEND_PROD_URL || process.env.FRONTEND_URL;
+        const frontendUrl = process.env.FRONTEND_URL;
         return res.redirect(`${frontendUrl}/home?token=${token}`);
 
       } else {
@@ -213,7 +213,7 @@ export class AuthController {
   async logout(@Res() res: Response) {
     try {
       // URL de logout de Auth0 con redirección al frontend
-      const frontendUrl = process.env.FRONTEND_PROD_URL || process.env.FRONTEND_URL;
+      const frontendUrl = process.env.FRONTEND_URL;
       const auth0LogoutUrl = `${process.env.AUTH0_ISSUER_BASE_URL}/v2/logout?client_id=${process.env.AUTH0_CLIENT_ID}&returnTo=${encodeURIComponent(frontendUrl + '/home')}`;
 
       // Redirige a la URL de logout de Auth0 que luego redirige al frontend
