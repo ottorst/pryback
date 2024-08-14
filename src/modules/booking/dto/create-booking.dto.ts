@@ -1,10 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsDate,
   IsDateString,
   IsNotEmpty,
-  isNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
   Max,
   Min,
@@ -15,9 +14,9 @@ export class CreateBookingDto {
     description: 'Transaction Number',
     example: '123456785',
   })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  transactionNumber: string;
+  TransactionNumber?: string;
 
   @ApiProperty({
     description: 'Quantity of tickets',
@@ -25,7 +24,7 @@ export class CreateBookingDto {
   })
   @IsNotEmpty()
   @Min(1)
-  quantity: number;
+  Quantity: number;
 
   @ApiProperty({
     description: 'Paid amount',
@@ -34,7 +33,7 @@ export class CreateBookingDto {
   @IsNotEmpty()
   @IsNumber()
   @Min(1)
-  paid: number;
+  Paid: number;
 
   @ApiProperty({
     description: 'Date of booking',
@@ -42,7 +41,7 @@ export class CreateBookingDto {
   })
   @IsNotEmpty()
   @IsDateString()
-  date: string;
+  Date: string;
 
   @ApiProperty({
     description: 'Event Id',
