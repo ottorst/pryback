@@ -4,6 +4,8 @@ import { UpdateBookingDto } from './dto/update-booking.dto';
 import * as fs from 'fs';
 import { PrismaService } from '../prisma/prisma.service';
 import { Booking } from '@prisma/client';
+import { UpdateUserDto } from '../users/dto/update-user.dto';
+import { log } from 'console';
 
 @Injectable()
 export class BookingService {
@@ -24,13 +26,13 @@ export class BookingService {
   }
   async create(createBookingDto: CreateBookingDto) {
     try {
-      const fecha = new Date(createBookingDto.date);
+      const fecha = new Date(createBookingDto.Date);
 
       const booking = await this.prisma.booking.create({
         data: {
-          TransactionNumber: createBookingDto.transactionNumber,
-          Quantity: createBookingDto.quantity,
-          Paid: createBookingDto.paid,
+          TransactionNumber: createBookingDto.TransactionNumber,
+          Quantity: createBookingDto.Quantity,
+          Paid: createBookingDto.Paid,
           Date: fecha,
           userId: createBookingDto.userId,
           eventsId: createBookingDto.eventsId,
@@ -42,17 +44,36 @@ export class BookingService {
     } catch (error) {
       console.log(error);
       throw new Error(
-        'Error en el servicio de creación de reserva. Verifica que no tengas duplicados el usuario y el evento',
+        'Booking. Error en el servicio de creación de reserva. Verifica que no tengas duplicados el usuario y el evento',
       );
     }
   }
 
   async findAll() {
     try {
-      const bookings = await this.prisma.booking.findMany();
+      const bookings = await this.prisma.booking.findMany({
+        // where: { deletedAt: { not: null } },
+        where: {
+          OR: [{ deletedAt: null }, { TransactionNumber: { not: null } }],
+        },
+      });
       return bookings;
     } catch (error) {
-      throw new Error('Error en el servicio de búsqueda.');
+      throw new Error('Booking. Error en el servicio de búsqueda.');
+    }
+  }
+
+  async deleteds() {
+    // deleteAt IS NULL or TransactionNumber IS NULL
+    try {
+      const bookings = await this.prisma.booking.findMany({
+        where: {
+          OR: [{ deletedAt: { not: null } }, { TransactionNumber: null }],
+        },
+      });
+      return bookings;
+    } catch (error) {
+      throw new Error('Booking. Error en el servicio de búsqueda eliminados.');
     }
   }
 
@@ -68,7 +89,9 @@ export class BookingService {
       });
       return booking;
     } catch (error) {
-      throw new Error('Error en el servicio de búsqueda.');
+      throw new Error(
+        'Booking. Error en el servicio de búsqueda por usuario y evento.',
+      );
     }
   }
 
@@ -81,7 +104,7 @@ export class BookingService {
       });
       return booking;
     } catch (error) {
-      throw new Error('Error en el servicio de búsqueda.');
+      throw new Error('Booking. Error en el servicio de búsqueda por usuario.');
     }
   }
 
@@ -94,15 +117,66 @@ export class BookingService {
       });
       return booking;
     } catch (error) {
-      throw new Error('Error en el servicio de búsqueda.');
+      throw new Error('Booking. Error en el servicio de búsqueda.');
     }
   }
 
-  update(id: number, updateBookingDto: UpdateBookingDto) {
-    return `This action updates a #${id} booking`;
+  async update(
+    idUser: number,
+    idEvent: number,
+    updateBookingDto: UpdateBookingDto,
+  ) {
+    const updateData: Partial<UpdateBookingDto> = { ...updateBookingDto };
+    console.log(
+      'idUser',
+      idUser,
+      'idEvent',
+      idEvent,
+      'updateBookingDto',
+      updateBookingDto,
+    );
+    try {
+      const booking = await this.prisma.booking.update({
+        where: {
+          userId_eventsId: {
+            userId: idUser,
+            eventsId: idEvent,
+          },
+        },
+        data: updateBookingDto,
+      });
+      return booking;
+    } catch (error) {
+      console.log(error);
+
+      throw new Error('Booking: Error en el servicio de actualización.');
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} booking`;
+  async remove(idUser: number, idEvent: number) {
+    try {
+      // const booking = await this.prisma.booking.update({
+      //   where: {
+      //     userId_eventsId: {
+      //       userId: idUser,
+      //       eventsId: idEvent,
+      //     },
+      //   },
+      //   data: {
+      //     deletedAt: new Date(),
+      //   },
+      // });
+      const booking = await this.prisma.booking.delete({
+        where: {
+          userId_eventsId: {
+            userId: idUser,
+            eventsId: idEvent,
+          },
+        },
+      });
+      return booking;
+    } catch (error) {
+      throw new Error('Booking: Error en el servicio de eliminación.');
+    }
   }
 }

@@ -71,6 +71,9 @@ export class UsersService {
       const users = await this.prisma.user.findMany({
         include: {
           bookings: {
+            where: {
+              OR: [{ TransactionNumber: { not: null } }],
+            },
             include: {
               events: true,
             },
@@ -86,12 +89,8 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    console.log('CreateUserDto received in create method:', updateUserDto);
     const updatedData: Partial<CreateUserDto> = {};
     try {
-      // if (updateUserDto.email) {
-      //   updatedData.email = updateUserDto.email;
-      // }
       let somethingChanged = false;
       if (updateUserDto.name) {
         updatedData.name = updateUserDto.name;
@@ -128,10 +127,6 @@ export class UsersService {
         updatedData.country = updateUserDto.country;
         somethingChanged = true;
       }
-      // if (updateUserDto.auth0Id) {
-      //   updatedData.auth0Id = updateUserDto.auth0Id;
-      // }
-
       if (updateUserDto.admin !== undefined) {
         updatedData.admin = updateUserDto.admin;
         somethingChanged = true;

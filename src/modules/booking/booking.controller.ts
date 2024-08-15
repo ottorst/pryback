@@ -38,8 +38,11 @@ export class BookingController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createBookingDto: CreateBookingDto) {
+    console.log('controller createBookingDto: ', createBookingDto);
     try {
-      if (new Date(createBookingDto.date) < new Date()) {
+      console.log('createBookingDto: ', createBookingDto);
+
+      if (new Date(createBookingDto.Date) < new Date()) {
         throw new HttpException(
           'The date cannot be in the past.',
           HttpStatus.BAD_REQUEST,
@@ -49,8 +52,10 @@ export class BookingController {
         await this.eventsService.eventDetailCountingBookingsAndPersons(
           createBookingDto.eventsId,
         );
+      console.log('Booking controller event: ', event);
+
       const available = event.maxseats - event.totalPersons;
-      if (createBookingDto.quantity > available) {
+      if (createBookingDto.Quantity > available) {
         throw new HttpException(
           `There are only ${available} seats available.`,
           HttpStatus.BAD_REQUEST,
@@ -80,18 +85,13 @@ export class BookingController {
     }
   }
 
-  @Get('byID/:idUser/:idEvent')
+  @Get('deleteds')
   @HttpCode(HttpStatus.OK)
-  async findOne(
-    @Param('idUser') idUser: string,
-    @Param('idEvent') idEvent: string,
-  ) {
+  async deleteds() {
     try {
-      const booking = await this.bookingService.findOne(+idUser, +idEvent);
+      const booking = await this.bookingService.deleteds();
       if (!booking) {
-        throw new BadRequestException(
-          `Booking not found for user ${idUser} and event ${idEvent}`,
-        );
+        throw new BadRequestException(`Booking not found deleteds`);
       }
       return booking;
     } catch (error) {
@@ -136,15 +136,26 @@ export class BookingController {
     }
   }
 
-  /*
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBookingDto: UpdateBookingDto) {
-    return this.bookingService.update(+id, updateBookingDto);
+  @Patch('/:idUser/:idEvent')
+  async update(
+    @Param('idUser') idUser: string,
+    @Param('idEvent') idEvent: string,
+    @Body() updateBookingDto: UpdateBookingDto,
+  ) {
+    console.log('Controller: updateBookingDto', updateBookingDto);
+
+    return await this.bookingService.update(
+      +idUser,
+      +idEvent,
+      updateBookingDto,
+    );
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.bookingService.remove(+id);
+  @Delete('/:idUser/:idEvent')
+  async remove(
+    @Param('idUser') idUser: string,
+    @Param('idEvent') idEvent: string,
+  ) {
+    return await this.bookingService.remove(+idUser, +idEvent);
   }
-	*/
 }
