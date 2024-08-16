@@ -8,9 +8,10 @@ import { PrismaModule } from './modules/prisma/prisma.module';
 import { BookingModule } from './modules/booking/booking.module';
 import {FileUploadModule}from './modules/image-upload/image-upload.module'
 import { SendEmailModule } from './modules/send-email/sendEmail.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [UsersModule, EventsModule, AuthModule, PrismaModule, BookingModule,FileUploadModule,SendEmailModule],
+  imports: [UsersModule, EventsModule, AuthModule, PrismaModule, BookingModule,FileUploadModule,SendEmailModule,ConfigModule.forRoot({ isGlobal: true })],
   controllers: [AppController],
   providers: [AppService],
 })

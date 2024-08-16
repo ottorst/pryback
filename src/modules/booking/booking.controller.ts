@@ -9,13 +9,17 @@ import {
   HttpException,
   HttpStatus,
   HttpCode,
+  UseGuards,
   BadRequestException,
 } from '@nestjs/common';
+import { AuthGuard } from 'src/guards/auth/auth.guard';
+import { IsAdmin } from 'src/decorators/rol/IsAdmin.decorator';
+import { RolesGuards } from 'src/guards/role/roles.guard';
 import { BookingService } from './booking.service';
 import { EventsService } from '../events/events.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiResponse, ApiTags,ApiBearerAuth, } from '@nestjs/swagger';
 
 @Controller('booking')
 @ApiTags('bookings')
@@ -37,6 +41,9 @@ export class BookingController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @ApiBearerAuth()
+  @IsAdmin(false)
+  @UseGuards(AuthGuard, RolesGuards)
   async create(@Body() createBookingDto: CreateBookingDto) {
     try {
       if (new Date(createBookingDto.date) < new Date()) {
@@ -68,6 +75,9 @@ export class BookingController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @IsAdmin(true)
+  @UseGuards(AuthGuard, RolesGuards)
   async findAll() {
     try {
       const bookings = await this.bookingService.findAll();
@@ -82,6 +92,9 @@ export class BookingController {
 
   @Get('byID/:idUser/:idEvent')
   @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @IsAdmin(true)
+  @UseGuards(AuthGuard, RolesGuards)
   async findOne(
     @Param('idUser') idUser: string,
     @Param('idEvent') idEvent: string,
@@ -104,6 +117,9 @@ export class BookingController {
 
   @Get('byEvent/:idEvent')
   @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @IsAdmin(true)
+  @UseGuards(AuthGuard, RolesGuards)
   async findOneByEvent(@Param('idEvent') idEvent: string) {
     try {
       const booking = await this.bookingService.findOneByEvent(+idEvent);

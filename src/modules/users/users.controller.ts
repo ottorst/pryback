@@ -15,6 +15,9 @@ import {
   UseGuards,
   Patch,
 } from '@nestjs/common';
+import { AuthGuard } from 'src/guards/auth/auth.guard';
+import { IsAdmin } from 'src/decorators/rol/IsAdmin.decorator';
+import { RolesGuards } from 'src/guards/role/roles.guard';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -23,6 +26,7 @@ import {
   ApiBadRequestResponse,
   ApiBody,
   ApiExcludeEndpoint,
+  ApiBearerAuth,
   ApiQuery,
   ApiResponse,
   ApiTags,
@@ -71,7 +75,6 @@ export class UsersController {
   }
 
   @Get()
-  //@UseGuards(AuthorizationGuard) // Aplica el guardia a esta ruta
   @HttpCode(HttpStatus.OK)
   @ApiResponse({
     status: HttpStatus.OK,
@@ -85,6 +88,9 @@ export class UsersController {
   @ApiUnauthorizedResponse({
     description: 'Unauthorized. Role: ADMIN, AuthGuard.',
   })
+  @ApiBearerAuth()
+  @IsAdmin(true)
+  @UseGuards(AuthGuard, RolesGuards)
   async findAll() {
     try {
       return await this.usersService.findAll();
@@ -116,6 +122,9 @@ export class UsersController {
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @IsAdmin(false)
+  @UseGuards(AuthGuard, RolesGuards)
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     console.log('CreateUserDto received in create method:', id, updateUserDto);
 
@@ -160,6 +169,9 @@ export class UsersController {
   @ApiUnauthorizedResponse({
     description: 'Unauthorized. Role: ADMIN, AuthGuard.',
   })
+  @ApiBearerAuth()
+  @IsAdmin(true)
+  @UseGuards(AuthGuard, RolesGuards)
   async remove(@Param('id') id: string) {
     // TODO: check if user is admin
     try {
@@ -179,6 +191,9 @@ export class UsersController {
 
   @Get('deleteds')
   @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @IsAdmin(true)
+  @UseGuards(AuthGuard, RolesGuards)
   async deletedUsers() {
     try {
       return await this.usersService.deleteds();
