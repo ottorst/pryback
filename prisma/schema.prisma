@@ -7,9 +7,9 @@
 // For more info on Prisma Explicit Relations, visit https://www.prisma.io/docs/orm/more/help-and-troubleshooting/help-articles/working-with-many-to-many-relations#explicit-relations
 
 generator client {
-  provider        = "prisma-client-js"
-  binaryTargets   = ["native", "debian-openssl-3.0.x"]
-  previewFeatures = ["fullTextSearch"] // for full text search
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+  // previewFeatures = ["fullTextSearch"] // for full text search
 }
 
 datasource db {
