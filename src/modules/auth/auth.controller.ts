@@ -15,7 +15,13 @@ import { SignUpAuthDto } from './dto/signup-auth.dto';
 import { SignInAuthDto } from './dto/signin-auth.dto';
 import { UserResponseDto } from '../users/dto/response.user.dto';
 import { DateAdderInterceptor } from 'src/interceptor/date-adder.interceptor';
-import { ApiTags, ApiOperation, ApiBody, ApiResponse, ApiExcludeEndpoint } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBody,
+  ApiResponse,
+  ApiExcludeEndpoint,
+} from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 
@@ -131,6 +137,12 @@ export class AuthController {
     }
   }
 
+  @Get('auth0/login')
+  redirectToAuth0(@Res() res: Response) {
+    const authUrl = `${process.env.AUTH0_ISSUER_BASE_URL}/authorize?prompt=select_account&response_type=code&client_id=${process.env.AUTH0_CLIENT_ID}&redirect_uri=${process.env.BACKEND_URL}/auth/auth0/callback&scope=openid profile email`;
+    res.redirect(authUrl);
+  }
+
   @Get('auth0/callback')
   //@ApiExcludeEndpoint()
   @ApiOperation({ summary: 'Handle Auth0 callback and authenticate the user' })
@@ -155,13 +167,18 @@ export class AuthController {
       if (req.oidc?.isAuthenticated()) {
         const email = req.oidc.user?.email;
         const auth0Id = req.oidc.user?.sub;
-  
+
         if (!email || !auth0Id) {
-          return res.status(HttpStatus.BAD_REQUEST).json({ message: 'No email or auth0Id found' });
+          return res
+            .status(HttpStatus.BAD_REQUEST)
+            .json({ message: 'No email or auth0Id found' });
         }
-  
-        let user = await this.authService.findUserByAuth0IdOrEmail(auth0Id, email);
-  
+
+        let user = await this.authService.findUserByAuth0IdOrEmail(
+          auth0Id,
+          email,
+        );
+
         if (!user) {
           const newUser: SignUpAuthDto = {
             email: email,
@@ -170,7 +187,7 @@ export class AuthController {
             passwordConfirm: '',
             auth0Id: auth0Id,
           };
-  
+
           user = await this.authService.registerUserWithAuth0(newUser);
           await fetch(`${process.env.BACKEND_URL}/email/createUserEmail`, {
             method: 'POST',
@@ -183,28 +200,32 @@ export class AuthController {
               urlHome: process.env.FRONTEND_URL,
               name: newUser.name,
             }),
-          });  
+          });
         }
-  
+
         const token = await this.authService.createToken(user);
-  
+
         // Redirige al frontend con el token en la URL
 
         const frontendUrl = process.env.FRONTEND_URL;
         return res.redirect(`${frontendUrl}/home?token=${token}`);
-
       } else {
-        res.status(HttpStatus.UNAUTHORIZED).json({ message: 'User not authenticated' });
+        res
+          .status(HttpStatus.UNAUTHORIZED)
+          .json({ message: 'User not authenticated' });
       }
     } catch (error) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Error auth0 user', error });
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: 'Error auth0 user', error });
     }
   }
   @Get('logout')
   @ApiOperation({ summary: 'Logout user from Auth0 and redirect to frontend' })
   @ApiResponse({
     status: 302,
-    description: 'Redirects the user to the Auth0 logout URL and then to the frontend',
+    description:
+      'Redirects the user to the Auth0 logout URL and then to the frontend',
   })
   @ApiResponse({
     status: 500,
@@ -219,7 +240,7 @@ export class AuthController {
       // Redirige a la URL de logout de Auth0 que luego redirige al frontend
       return res.redirect(auth0LogoutUrl);
     } catch (error) {
-      return res.status(500).json({ message: 'Error logging out', error });
-    }
-  }
+      return res.status(500).json({ message: 'Error logging out', error });
+    }
+  }
 }
