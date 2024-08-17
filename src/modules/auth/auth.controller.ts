@@ -131,6 +131,12 @@ export class AuthController {
     }
   }
 
+  @Get('auth0/login')
+redirectToAuth0(@Res() res: Response) {
+  const authUrl = `${process.env.AUTH0_ISSUER_BASE_URL}/authorize?prompt=select_account&response_type=code&client_id=${process.env.AUTH0_CLIENT_ID}&redirect_uri=${process.env.BACKEND_URL}/auth/auth0/callback&scope=openid profile email`;
+  res.redirect(authUrl);
+}
+
   @Get('auth0/callback')
   //@ApiExcludeEndpoint()
   @ApiOperation({ summary: 'Handle Auth0 callback and authenticate the user' })
