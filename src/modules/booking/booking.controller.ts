@@ -97,7 +97,6 @@ export class BookingController {
 
   @Get('deleteds')
   @HttpCode(HttpStatus.OK)
-<<<<<<< HEAD
   @ApiBearerAuth()
   @IsAdmin(true)
   @UseGuards(AuthGuard, RolesGuards)
@@ -105,9 +104,7 @@ export class BookingController {
     @Param('idUser') idUser: string,
     @Param('idEvent') idEvent: string,
   ) {
-=======
-  async deleteds() {
->>>>>>> a631bea4225c9a79a91821d3038506468a640e47
+
     try {
       const booking = await this.bookingService.deleteds();
       if (!booking) {
