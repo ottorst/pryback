@@ -88,16 +88,16 @@ export class SendEmailController {
     status: 500,
     description: 'Internal server error.',
   })
-  @ApiBody({ type: SendMailBookingDto })
+  @ApiBody({ type: sendContactEmailDto })
   async sendContactEmail(@Body() sendContactEmailDto: sendContactEmailDto) {
     const {fullname, email, message} = sendContactEmailDto;
     let html =""
     try {
       // mensaje de del user 
-      const messajeSend = await this.sendEmailService.sendMail(process.env.NODEMAILER_USER, `${fullname} sent you a message!`, message, html);
+      const messajeSend = await this.sendEmailService.sendMail(process.env.NODEMAILER_USER, `${fullname} sent you a message!`, message + ` You can reply to the sender's email ${email}`, html);
       if (messajeSend.accepted.length > 0) {
         // confirmacion del mensaje enviado
-        await this.sendEmailService.sendMail(email, `your message was sent correctly`, message, html)
+        await this.sendEmailService.sendMail(email, `your message was sent correctly`, message + ` You can reply to the sender's email ${email}`, html)
 
         return messajeSend;
       } else {
