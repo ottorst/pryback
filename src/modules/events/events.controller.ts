@@ -49,6 +49,9 @@ export class EventsController {
     description: 'The record has been successfully created.',
   })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
+  @ApiBearerAuth()
+  @IsAdmin(true)
+  @UseGuards(AuthGuard, RolesGuards)
   async create(@Body() createEventDto: CreateEventDto) {
     try {
       if (new Date(createEventDto.date) < new Date()) {
@@ -69,9 +72,6 @@ export class EventsController {
     type: [CreateEventDto],
     isArray: true,
   })
-  // @ApiBearerAuth()
-  // @IsAdmin(true)
-  // @UseGuards(AuthGuard, RolesGuards)
   findAll() {
     try {
       return this.eventsService.findAll();
@@ -85,6 +85,9 @@ export class EventsController {
 
   @Put(':id')
   @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @IsAdmin(true)
+  @UseGuards(AuthGuard, RolesGuards)
   async update(
     @Param('id') id: string,
     @Body() updateEventDto: CreateEventDto,
@@ -112,6 +115,9 @@ export class EventsController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.ACCEPTED)
+  @ApiBearerAuth()
+  @IsAdmin(true)
+  @UseGuards(AuthGuard, RolesGuards)
   remove(@Param('id') id: string) {
     try {
       return this.eventsService.remove(+id);
@@ -137,6 +143,9 @@ export class EventsController {
 
   @Get('deleteds')
   @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @IsAdmin(true)
+  @UseGuards(AuthGuard, RolesGuards)
   async deletedEvents() {
     try {
       return await this.eventsService.deleteds();
@@ -147,7 +156,9 @@ export class EventsController {
       );
     }
   }
-
+  @ApiBearerAuth()
+  @IsAdmin(true)
+  @UseGuards(AuthGuard, RolesGuards)
   @Get('eventsWithBookingsAndUsers')
   @HttpCode(HttpStatus.OK)
   async findEventsWithBookingsAndUsers() {
@@ -164,7 +175,9 @@ export class EventsController {
       );
     }
   }
-
+  @ApiBearerAuth()
+  @IsAdmin(true)
+  @UseGuards(AuthGuard, RolesGuards)
   @Get('eventsCountingBookings')
   @HttpCode(HttpStatus.OK)
   @ApiResponse({
@@ -172,6 +185,9 @@ export class EventsController {
     description: `${HttpStatus.OK}: Event list retrieved successfully. Include events, totalPersons, totalBookings, bookings array is null for security reasons.`,
     isArray: true,
   })
+  @ApiBearerAuth()
+  @IsAdmin(true)
+  @UseGuards(AuthGuard, RolesGuards)
   async eventsCountingBookings() {
     try {
       const events =
@@ -187,7 +203,9 @@ export class EventsController {
       );
     }
   }
-
+  @ApiBearerAuth()
+  @IsAdmin(true)
+  @UseGuards(AuthGuard, RolesGuards)
   @Get('eventDetailCountingBookingsAndPersons/:id')
   @HttpCode(HttpStatus.OK)
   async eventDetailCountingBookingsAndPersons(@Param('id') id: number) {
