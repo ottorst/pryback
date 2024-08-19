@@ -41,7 +41,7 @@ export class SendMailDto {
 /**
  * Data Transfer Object for sending a registration email
  */
-export class SendMailRegisterDto extends  OmitType(SendMailDto, ['html', "subject"]){
+export class SendMailRegisterDto extends  OmitType(SendMailDto, ['html', "subject"]) {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
@@ -129,4 +129,29 @@ export class SendMailBookingDto extends OmitType(SendMailDto, ['html', "subject"
     example: 'https://www.example.com'
   })
   urlHome: string;
+}
+export class sendContactEmailDto{
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({
+    description: 'Name of the issuer',
+    example: 'John Doe'
+  })
+  fullname: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({
+    description: 'Message content',
+    example: 'This is the content of the message'
+  })
+  message: string;
+
+  @IsEmail()
+  @IsNotEmpty()
+  @ApiProperty({
+    description: 'Email of the issuer',
+    example: 'example@example.com'
+  })
+  email: string;
 }
