@@ -41,9 +41,9 @@ export class BookingController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiBearerAuth()
-  @IsAdmin(false)
-  @UseGuards(AuthGuard, RolesGuards)
+  // @ApiBearerAuth()
+  // @IsAdmin(false)
+  // @UseGuards(AuthGuard, RolesGuards)
   async create(@Body() createBookingDto: CreateBookingDto) {
     console.log('controller createBookingDto: ', createBookingDto);
     try {
@@ -80,9 +80,9 @@ export class BookingController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
-  @IsAdmin(true)
-  @UseGuards(AuthGuard, RolesGuards)
+  // @ApiBearerAuth()
+  // @IsAdmin(true)
+  // @UseGuards(AuthGuard, RolesGuards)
   async findAll() {
     try {
       const bookings = await this.bookingService.findAll();
@@ -97,9 +97,9 @@ export class BookingController {
 
   @Get('deleteds')
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
-  @IsAdmin(true)
-  @UseGuards(AuthGuard, RolesGuards)
+  // @ApiBearerAuth()
+  // @IsAdmin(true)
+  // @UseGuards(AuthGuard, RolesGuards)
   async findOne(
     @Param('idUser') idUser: string,
     @Param('idEvent') idEvent: string,
@@ -121,9 +121,9 @@ export class BookingController {
 
   @Get('byEvent/:idEvent')
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
-  @IsAdmin(true)
-  @UseGuards(AuthGuard, RolesGuards)
+  // @ApiBearerAuth()
+  // @IsAdmin(true)
+  // @UseGuards(AuthGuard, RolesGuards)
   async findOneByEvent(@Param('idEvent') idEvent: string) {
     try {
       const booking = await this.bookingService.findOneByEvent(+idEvent);

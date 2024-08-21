@@ -88,9 +88,9 @@ export class UsersController {
   @ApiUnauthorizedResponse({
     description: 'Unauthorized. Role: ADMIN, AuthGuard.',
   })
-  @ApiBearerAuth()
-  @IsAdmin(true)
-  @UseGuards(AuthGuard, RolesGuards)
+  // @ApiBearerAuth()
+  // @IsAdmin(true)
+  // @UseGuards(AuthGuard, RolesGuards)
   async findAll() {
     try {
       return await this.usersService.findAll();
@@ -122,9 +122,9 @@ export class UsersController {
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
-  @IsAdmin(false)
-  @UseGuards(AuthGuard, RolesGuards)
+  // @ApiBearerAuth()
+  // @IsAdmin(false)
+  // @UseGuards(AuthGuard, RolesGuards)
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     console.log('CreateUserDto received in create method:', id, updateUserDto);
 
@@ -169,9 +169,9 @@ export class UsersController {
   @ApiUnauthorizedResponse({
     description: 'Unauthorized. Role: ADMIN, AuthGuard.',
   })
-  @ApiBearerAuth()
-  @IsAdmin(true)
-  @UseGuards(AuthGuard, RolesGuards)
+  // @ApiBearerAuth()
+  // @IsAdmin(true)
+  // @UseGuards(AuthGuard, RolesGuards)
   async remove(@Param('id') id: string) {
     // TODO: check if user is admin
     try {
@@ -191,9 +191,9 @@ export class UsersController {
 
   @Get('deleteds')
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
-  @IsAdmin(true)
-  @UseGuards(AuthGuard, RolesGuards)
+  // @ApiBearerAuth()
+  // @IsAdmin(true)
+  // @UseGuards(AuthGuard, RolesGuards)
   async deletedUsers() {
     try {
       return await this.usersService.deleteds();
