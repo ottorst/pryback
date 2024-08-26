@@ -9,16 +9,25 @@ import {
   HttpException,
   HttpStatus,
   HttpCode,
+  UseGuards,
+  BadRequestException,
 } from '@nestjs/common';
+import { AuthGuard } from 'src/guards/auth/auth.guard';
+import { IsAdmin } from 'src/decorators/rol/IsAdmin.decorator';
+import { RolesGuards } from 'src/guards/role/roles.guard';
 import { BookingService } from './booking.service';
+import { EventsService } from '../events/events.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiResponse, ApiTags,ApiBearerAuth, } from '@nestjs/swagger';
 
 @Controller('booking')
 @ApiTags('bookings')
 export class BookingController {
-  constructor(private readonly bookingService: BookingService) {}
+  constructor(
+    private readonly bookingService: BookingService,
+    private readonly eventsService: EventsService,
+  ) {}
 
   @Get('seeder')
   @HttpCode(HttpStatus.CREATED)
@@ -32,8 +41,33 @@ export class BookingController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  // @ApiBearerAuth()
+  // @IsAdmin(false)
+  // @UseGuards(AuthGuard, RolesGuards)
   async create(@Body() createBookingDto: CreateBookingDto) {
+    console.log('controller createBookingDto: ', createBookingDto);
     try {
+      console.log('createBookingDto: ', createBookingDto);
+
+      if (new Date(createBookingDto.Date) < new Date()) {
+        throw new HttpException(
+          'The date cannot be in the past.',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      const event =
+        await this.eventsService.eventDetailCountingBookingsAndPersons(
+          createBookingDto.eventsId,
+        );
+      console.log('Booking controller event: ', event);
+
+      const available = event.maxseats - event.totalPersons;
+      if (createBookingDto.Quantity > available) {
+        throw new HttpException(
+          `There are only ${available} seats available.`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
       const booking = await this.bookingService.create(createBookingDto);
       return booking;
     } catch (error) {
@@ -46,6 +80,9 @@ export class BookingController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
+  // @ApiBearerAuth()
+  // @IsAdmin(true)
+  // @UseGuards(AuthGuard, RolesGuards)
   async findAll() {
     try {
       const bookings = await this.bookingService.findAll();
@@ -58,18 +95,20 @@ export class BookingController {
     }
   }
 
-  @Get('byID/:idUser/:idEvent')
+  @Get('deleteds')
   @HttpCode(HttpStatus.OK)
+  // @ApiBearerAuth()
+  // @IsAdmin(true)
+  // @UseGuards(AuthGuard, RolesGuards)
   async findOne(
     @Param('idUser') idUser: string,
     @Param('idEvent') idEvent: string,
   ) {
+
     try {
-      const booking = await this.bookingService.findOne(+idUser, +idEvent);
+      const booking = await this.bookingService.deleteds();
       if (!booking) {
-        throw new Error(
-          `Booking not found for user ${idUser} and event ${idEvent}`,
-        );
+        throw new BadRequestException(`Booking not found deleteds`);
       }
       return booking;
     } catch (error) {
@@ -82,11 +121,14 @@ export class BookingController {
 
   @Get('byEvent/:idEvent')
   @HttpCode(HttpStatus.OK)
+  // @ApiBearerAuth()
+  // @IsAdmin(true)
+  // @UseGuards(AuthGuard, RolesGuards)
   async findOneByEvent(@Param('idEvent') idEvent: string) {
     try {
       const booking = await this.bookingService.findOneByEvent(+idEvent);
       if (!booking) {
-        throw new Error(`Booking not found for event ${idEvent}`);
+        throw new BadRequestException(`Booking not found for event ${idEvent}`);
       }
       return booking;
     } catch (error) {
@@ -103,7 +145,7 @@ export class BookingController {
     try {
       const booking = await this.bookingService.findOneByUser(+idUser);
       if (!booking) {
-        throw new Error(`Booking not found for user ${idUser}`);
+        throw new BadRequestException(`Booking not found for user ${idUser}`);
       }
       return booking;
     } catch (error) {
@@ -114,15 +156,26 @@ export class BookingController {
     }
   }
 
-  /*
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBookingDto: UpdateBookingDto) {
-    return this.bookingService.update(+id, updateBookingDto);
+  @Patch('/:idUser/:idEvent')
+  async update(
+    @Param('idUser') idUser: string,
+    @Param('idEvent') idEvent: string,
+    @Body() updateBookingDto: UpdateBookingDto,
+  ) {
+    console.log('Controller: updateBookingDto', updateBookingDto);
+
+    return await this.bookingService.update(
+      +idUser,
+      +idEvent,
+      updateBookingDto,
+    );
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.bookingService.remove(+id);
+  @Delete('/:idUser/:idEvent')
+  async remove(
+    @Param('idUser') idUser: string,
+    @Param('idEvent') idEvent: string,
+  ) {
+    return await this.bookingService.remove(+idUser, +idEvent);
   }
-	*/
 }

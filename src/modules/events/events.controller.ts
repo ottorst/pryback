@@ -11,7 +11,7 @@ import {
   HttpStatus,
   BadRequestException,
   HttpException,
-  UseGuards
+  UseGuards,
 } from '@nestjs/common';
 
 import { AuthGuard } from 'src/guards/auth/auth.guard';
@@ -21,19 +21,16 @@ import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 
-
 import {
   ApiTags,
   ApiBearerAuth,
   ApiResponse,
   ApiUnauthorizedResponse,
-  
 } from '@nestjs/swagger';
 @ApiTags('events')
 @Controller('events')
 export class EventsController {
-  constructor(private readonly eventsService: EventsService
-  ) {}
+  constructor(private readonly eventsService: EventsService) {}
 
   @Get('seeder')
   @HttpCode(HttpStatus.CREATED)
@@ -47,19 +44,21 @@ export class EventsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
- 
   @ApiResponse({
     status: 201,
     description: 'The record has been successfully created.',
   })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
-  async create(
-    @Body() createEventDto: CreateEventDto) {
+  // @ApiBearerAuth()
+  // @IsAdmin(true)
+  // @UseGuards(AuthGuard, RolesGuards)
+  async create(@Body() createEventDto: CreateEventDto) {
     try {
-        const eventCreated = await this.eventsService.create(createEventDto);
-        return eventCreated;
-      
-     
+      if (new Date(createEventDto.date) < new Date()) {
+        throw new BadRequestException('The date cannot be in the past.');
+      }
+      const eventCreated = await this.eventsService.create(createEventDto);
+      return eventCreated;
     } catch (err: any) {
       throw new BadRequestException('Error creating an event. ' + err.message);
     }
@@ -73,9 +72,6 @@ export class EventsController {
     type: [CreateEventDto],
     isArray: true,
   })
-  // @ApiBearerAuth()
-  // @IsAdmin(true)
-  // @UseGuards(AuthGuard, RolesGuards)
   findAll() {
     try {
       return this.eventsService.findAll();
@@ -89,6 +85,9 @@ export class EventsController {
 
   @Put(':id')
   @HttpCode(HttpStatus.OK)
+  // @ApiBearerAuth()
+  // @IsAdmin(true)
+  // @UseGuards(AuthGuard, RolesGuards)
   async update(
     @Param('id') id: string,
     @Body() updateEventDto: CreateEventDto,
@@ -98,6 +97,12 @@ export class EventsController {
       if (!event) {
         throw new HttpException('Event not found. ', HttpStatus.NOT_FOUND);
       } else {
+        if (new Date(updateEventDto.date) <= new Date()) {
+          throw new HttpException(
+            'Event date must be greater than today. ',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
         return this.eventsService.update(+id, updateEventDto);
       }
     } catch (error) {
@@ -110,6 +115,9 @@ export class EventsController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.ACCEPTED)
+  // @ApiBearerAuth()
+  // @IsAdmin(true)
+  // @UseGuards(AuthGuard, RolesGuards)
   remove(@Param('id') id: string) {
     try {
       return this.eventsService.remove(+id);
@@ -135,6 +143,9 @@ export class EventsController {
 
   @Get('deleteds')
   @HttpCode(HttpStatus.OK)
+  // @ApiBearerAuth()
+  // @IsAdmin(true)
+  // @UseGuards(AuthGuard, RolesGuards)
   async deletedEvents() {
     try {
       return await this.eventsService.deleteds();
@@ -145,14 +156,16 @@ export class EventsController {
       );
     }
   }
-
+  // @ApiBearerAuth()
+  // @IsAdmin(true)
+  // @UseGuards(AuthGuard, RolesGuards)
   @Get('eventsWithBookingsAndUsers')
   @HttpCode(HttpStatus.OK)
   async findEventsWithBookingsAndUsers() {
     try {
       const events = await this.eventsService.findEventsWithBookingsAndUsers();
       if (!events) {
-        throw new Error('Events not found');
+        throw new BadRequestException(`Events not found`);
       }
       return events;
     } catch (error) {
@@ -162,7 +175,9 @@ export class EventsController {
       );
     }
   }
-
+  // @ApiBearerAuth()
+  // @IsAdmin(true)
+  // @UseGuards(AuthGuard, RolesGuards)
   @Get('eventsCountingBookings')
   @HttpCode(HttpStatus.OK)
   @ApiResponse({
@@ -170,12 +185,15 @@ export class EventsController {
     description: `${HttpStatus.OK}: Event list retrieved successfully. Include events, totalPersons, totalBookings, bookings array is null for security reasons.`,
     isArray: true,
   })
+  // @ApiBearerAuth()
+  // @IsAdmin(true)
+  // @UseGuards(AuthGuard, RolesGuards)
   async eventsCountingBookings() {
     try {
       const events =
         await this.eventsService.eventsCountingBookingsAndPersons();
       if (!events) {
-        throw new Error('Events not found');
+        throw new BadRequestException(`Events not found`);
       }
       return events;
     } catch (error) {
@@ -185,7 +203,9 @@ export class EventsController {
       );
     }
   }
-
+  // @ApiBearerAuth()
+  // @IsAdmin(true)
+  // @UseGuards(AuthGuard, RolesGuards)
   @Get('eventDetailCountingBookingsAndPersons/:id')
   @HttpCode(HttpStatus.OK)
   async eventDetailCountingBookingsAndPersons(@Param('id') id: number) {
@@ -195,7 +215,7 @@ export class EventsController {
       const eventWithBookings =
         await this.eventsService.eventDetailCountingBookingsAndPersons(+id);
       if (!eventWithBookings) {
-        throw new Error('Event not found');
+        throw new BadRequestException(`Event not found`);
       }
       return eventWithBookings;
     } catch (error) {
@@ -213,7 +233,7 @@ export class EventsController {
     try {
       const event = await this.eventsService.findOne(+id);
       if (!event) {
-        throw new Error('Event not found');
+        throw new BadRequestException(`Event not found`);
       }
       return event;
     } catch (error) {

@@ -115,6 +115,12 @@ export class EventsService {
         orderBy: { date: 'desc' },
         include: {
           bookings: {
+            orderBy: { Date: 'desc' },
+            where: {
+              deletedAt: null,
+              TransactionNumber: { not: null },
+              // OR: [{ deletedAt: null }, { TransactionNumber: { not: null } }],
+            },
             include: {
               user: true,
             },
@@ -127,8 +133,6 @@ export class EventsService {
     }
   }
 
-  //
-
   async eventDetailCountingBookingsAndPersons(id: number) {
     console.log('Service: eventDetailCountingBookingsAndPersons', id);
 
@@ -136,7 +140,13 @@ export class EventsService {
       const eventWithBookings = await this.prisma.events.findUnique({
         where: { id },
         include: {
-          bookings: true,
+          bookings: {
+            orderBy: { Date: 'desc' },
+            where: {
+              deletedAt: null,
+              TransactionNumber: { not: null },
+            },
+          },
         },
       });
 
@@ -184,7 +194,13 @@ export class EventsService {
         where: { deletedAt: null },
         orderBy: { date: 'desc' },
         include: {
-          bookings: true,
+          bookings: {
+            orderBy: { Date: 'desc' },
+            where: {
+              deletedAt: null,
+              TransactionNumber: { not: null },
+            },
+          },
         },
       });
 
@@ -208,7 +224,7 @@ export class EventsService {
   async findOneByTitle(title: string) {
     try {
       const event = await this.prisma.events.findMany({
-        where: { title },
+        where: { title: { contains: title } },
         include: {
           bookings: {
             include: {
